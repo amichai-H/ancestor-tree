@@ -35,6 +35,8 @@ namespace family
                         delete(mother);
                         delete(father);
                     }
+                    cout << "delete: "+name << endl;
+
             }
             
         };
