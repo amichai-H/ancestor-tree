@@ -132,6 +132,7 @@ TEST_CASE("complex tree"){
     CHECK(t.relation("Hanna").compare("grandmother")==1);
     CHECK(t.relation("Moshe").compare("grandfather")==1);
 }
+
 TEST_CASE("complex tree2"){
     family::Tree t("Amichai");
     t.addFather("Amichai","Sason").
