@@ -3,11 +3,60 @@
 #include <string>
 #include <iostream>
 using namespace std;
+#define COUNT 10  
 namespace family
 {
+    bool equals(string s1,string s2){
+        return s1.compare(s2)==0;
+    }
     void Node::set_name(string s){
         name = s;
     }
+    Node* Node::get_by_name(string name){
+        Node* returnThis1=NULL;
+        Node* returnThis2=NULL;
+
+        if (myNameIs(name))
+        {
+            return this;
+        }
+        if (father!=NULL)
+        {
+            returnThis1 = father->get_by_name(name);
+        }
+        if (mother!=NULL)
+        {
+            returnThis2 = mother->get_by_name(name);
+        }
+        if (returnThis1!=NULL)
+        {
+            return returnThis1;
+        }
+            return returnThis2;
+    }
+    Node* Node::get_by_relation(string relation){
+        Node* returnThis1=NULL;
+        Node* returnThis2=NULL;
+
+        if (equals(relation,this->relation))
+        {
+            return this;
+        }
+        if (father!=NULL)
+        {
+            returnThis1 = father->get_by_relation(relation);
+        }
+        if (mother!=NULL)
+        {
+            returnThis2 = mother->get_by_relation(relation);
+        }
+        if (returnThis1!=NULL)
+        {
+            return returnThis1;
+        }
+            return returnThis2;
+        }
+
     string Node::get_name(){
         return name;
     }
@@ -20,11 +69,7 @@ namespace family
         this->father->name=s;
     }
     bool Node::myNameIs(string s){
-        cout << "    compare" << endl;
-        cout << s << endl;
-        cout << get_name() << endl;
-        cout << "    end compare" << endl;
-        return (get_name().compare(s)==0);
+        return get_name().compare(s)==0;
     }
     Node* Node::get_mother(){
         return this->mother;
@@ -32,100 +77,171 @@ namespace family
     Node* Node::get_father(){
         return this->father;
     }
+    void Node::print2DUtil(Node *root, int space){   //take from https://www.geeksforgeeks.org/print-binary-tree-2-dimensions/
+    // Base case  
+    if (root == NULL)  
+        return;  
+  
+    // Increase distance between levels  
+    space += COUNT;  
+  
+    // Process right child first  
+    print2DUtil(root->father, space);  
+  
+    // Print current node after space  
+    // count  
+    cout<<endl;  
+    for (int i = COUNT; i < space; i++)  
+        cout<<" ";  
+    cout<<root->name<<"\n";  
+  
+    // Process left child  
+    print2DUtil(root->mother, space);  
+}  
 
 
 
     
-    bool Node::addRecorsiveF(string name, string father){
-        printf("Line 42\n");
-
+    bool Node::addRecorsiveF(string name, string father,string relation){
          //cout << get_name() << endl;
         if (this->myNameIs(name))
-        {
-            printf("Line 47 - sucsess\n");
+        {  
             this->set_father(father);
+            this->father->relation = relation;
             return true;
         }
         else
         {
-            printf("Line 53\n");
+            if (equals(relation,"father"))
+            {
+                relation = "grandfather";
+            }
+            else if(equals(relation,"grandfather"))
+            {
+                relation = "great-grandfather";
+            }
+            else
+            {
+                relation = "great-"+relation;
+            }
             if (this->get_father()==NULL && this->get_mother()==NULL)
             {
                 return false;
             }
             else if (this->get_father() == NULL )
             {
-                return this->get_mother()->addRecorsiveF(name,father);
+                return this->get_mother()->addRecorsiveF(name,father,relation);
             }
             else if(this->get_mother() == NULL)
             {
-            return this->get_father()->addRecorsiveF(name,father);
+            return this->get_father()->addRecorsiveF(name,father,relation);
 
             }else
             {
-                return this->get_father()->addRecorsiveF(name,father) || this->get_mother()->addRecorsiveF(name,father);
+                return this->get_father()->addRecorsiveF(name,father,relation) || this->get_mother()->addRecorsiveF(name,father,relation);
             }
 
             }
         }
-    bool Node::addRecorsiveM(string name, string mother){
+    bool Node::addRecorsiveM(string name, string mother, string relation){
         if (this->myNameIs(name))
         {
+           
             this->set_mother(mother);
+            this->mother->relation = relation;
             return true;
         }
         else
         {
+            if (equals(relation,"mother"))
+            {
+                relation = "grandmother";
+            }
+            else if(equals(relation,"grandmother"))
+            {
+                relation = "great-grandmother";
+            }
+            else
+            {
+                relation = "great-"+relation;
+            }
             if (this->get_father()==NULL && this->get_mother()==NULL)
             {
                 return false;
             }
             else if (this->get_father()==NULL )
             {
-                return this->get_mother()->addRecorsiveM(name,mother);
+                return this->get_mother()->addRecorsiveM(name,mother,relation);
             }
             else if(this->get_mother()==NULL)
             {
-            return this->get_father()->addRecorsiveM(name,mother);
+            return this->get_father()->addRecorsiveM(name,mother,relation);
 
             }else
             {
-                return this->get_father()->addRecorsiveM(name,mother) || this->get_mother()->addRecorsiveM(name,mother);
+                return this->get_father()->addRecorsiveM(name,mother,relation) || this->get_mother()->addRecorsiveM(name,mother,relation);
             }
 
             }
     }
     Tree& Tree::addFather(string name,string father){
-        printf("add father Line 101 \n");
-        if(!this->root->addRecorsiveF(name,father)){
+        if(!this->root->addRecorsiveF(name,father,"father")){
                 printf("fail Father\n");
 
             exit(1);
         }
-                printf("new Father 100\n");
 
         return *this;
     }
     Tree& Tree::addMother(string name,string mother){
-        if(!this->root->addRecorsiveM(name,mother)){
+        if(!this->root->addRecorsiveM(name,mother,"mother")){
             exit(1);
         }
         return *this;
     }
     string Tree::relation(string name){
-        return "no non";
+        if (equals(name,root->name))
+        {
+            return "me";
+        }
+        Node* temp = root->get_by_name(name);
+         if (temp==NULL)
+        {
+            return "unrelated";
+        }
+            return temp->relation;
+       
+        
     }
     string Tree::find(string motherORfather){
-        return "find find";
+        if(equals(motherORfather,"me")){
+            return this->root->name;
+        }
+        Node* temp = root->get_by_relation(motherORfather);
+        if (temp==NULL)
+        {
+            throw std::invalid_argument( "The tree cannot handle the '"+motherORfather+"' relation" );
+        }
+        return temp->name;
+        
     }
     void Tree::display(){
-        cout <<"display is active" << endl;
+        root->print2DUtil(root, 0);  
+        
         return;
     }
-    void Tree::remove(string s){
-        cout <<"remove is active" << endl;
-
-        return;
+    void Tree::remove(string name){
+        if (equals(name,root->name))
+        {
+            delete this;
+            return;
+        }
+        Node* temp = root->get_by_name(name);
+        if (temp==NULL)
+        {
+            return;
+        }
+        delete temp;
     }
 
     

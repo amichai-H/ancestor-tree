@@ -8,6 +8,7 @@ namespace family
     class Node{
         public:
             string name;
+            string relation = "me";
             Node *father;
             Node *mother;
             void set_name(string s);
@@ -17,8 +18,11 @@ namespace family
             bool myNameIs(string s);
             Node* get_mother();
             Node* get_father();
-            bool addRecorsiveF(string name, string father);
-            bool addRecorsiveM(string name, string mother);
+            Node* get_by_name(string name);
+            Node* get_by_relation(string relation);
+            bool addRecorsiveF(string name, string father,string relation);
+            bool addRecorsiveM(string name, string mother,string relation);
+            void print2DUtil(Node *root, int space);
             ~Node(){
                     if (this->father == NULL && this->mother == NULL)
                     {
@@ -26,14 +30,18 @@ namespace family
                     }
                     else if(this->father == NULL){
                         delete(this->mother);
+                        this->mother=NULL;
                      }
                     else if (this->mother == NULL)
                     {
                        delete(father);
+                       this->father=NULL;
                     }else
                     {
                         delete(mother);
                         delete(father);
+                        this->mother=NULL;
+                        this->father=NULL;
                     }
                     cout << "delete: "+name << endl;
 
